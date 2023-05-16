@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { NavBar } from "../component/NavBar";
-import { postData, useFetchCategories } from "../domain/categories";
+import {
+  useCreateCategory,
+  useDeleteCategory,
+  useFetchCategories,
+} from "../domain/categories";
 
 type CategoryPageProps = {
   HomeClick: () => void;
@@ -10,7 +14,9 @@ type CategoryPageProps = {
 
 export function CategoryPage(props: CategoryPageProps) {
   const [input, setInput] = useState("");
-  const { categories, reFetch } = useFetchCategories();
+  const { categories, reFetch, isLoadingFetch } = useFetchCategories();
+  const { isLoadingCreate, submit } = useCreateCategory();
+  const { isLoadingDelete, delCategory } = useDeleteCategory();
   return (
     <div>
       <NavBar
@@ -31,9 +37,10 @@ export function CategoryPage(props: CategoryPageProps) {
         value="Add"
         onClick={() => {
           const id = categories ? categories[categories?.length - 1].id + 1 : 1;
-          postData({ id: id, title: input });
-          setInput("");
-          reFetch();
+          submit({ id: id, title: input }).then(() => {
+            setInput("");
+            reFetch();
+          });
         }}
       ></input>
       <table>
@@ -54,12 +61,21 @@ export function CategoryPage(props: CategoryPageProps) {
                   <input
                     type="button"
                     value="Delete"
-                    onClick={() => console.log("Delete Clicked")}
+                    onClick={() =>
+                      delCategory({
+                        id: category.id,
+                        title: category.title,
+                      }).then(() => {
+                        reFetch();
+                      })
+                    }
                   ></input>
                   <input
                     type="button"
                     value="Edit"
-                    onClick={() => console.log("Edit Clicked")}
+                    onClick={() =>
+                      console.log(`${category.id} + ${category.title} `)
+                    }
                   ></input>
                 </td>
               </tr>
