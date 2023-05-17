@@ -6,6 +6,7 @@ import {
   useCreateProduct,
   useFetchProduct,
   useDeleteProduct,
+  useEditProduct,
 } from "../domain/product";
 
 type ProductPageProps = {
@@ -14,19 +15,47 @@ type ProductPageProps = {
   ProductClick: () => void;
 };
 
+type InputType = "add" | "edit";
+
 export function ProductPage(props: ProductPageProps) {
   const [inputProduct, setInputProduct] = useState<Product>({} as Product);
+  const [inputType, setInputType] = useState<InputType>("add");
   const [inputCategoryProduct, setInputCategoryProduct] = useState<number>();
-  const { categories, reFetch, isLoadingFetch } = useFetchCategories();
   const { products, reFetchProduct, isLoadingFetchProduct } = useFetchProduct();
+  const [editProduct, setEditProduct] = useState<number>(
+    products ? products[products.length - 1].id + 1 : 1
+  );
+  const { categories, reFetch, isLoadingFetch } = useFetchCategories();
   const { isLoadingCreate, submit } = useCreateProduct();
   const { delProduct, isLoadingDelete } = useDeleteProduct();
+  const { isLoadingEdit, updateProduct } = useEditProduct();
+
   function onAddProduct(props: Product) {
     const id = products ? products[products.length - 1].id + 1 : 1;
     const newProduct = { ...props, id: id };
     submit(newProduct).then(() => {
       reFetchProduct();
     });
+  }
+
+  function onEditProduct(props: Product) {
+    updateProduct({
+      id: props.id,
+      title: props.title,
+      price: props.price,
+      categoryId: props.categoryId,
+    }).then(() => {
+      const blankProduct = {} as Product;
+      setInputProduct(blankProduct);
+      reFetchProduct();
+    });
+  }
+
+  function categoryTitle(props: Product) {
+    const nameCategory = categories?.find(
+      (category) => category.id === props.categoryId
+    );
+    return nameCategory?.title;
   }
   return (
     <div>
@@ -71,7 +100,11 @@ export function ProductPage(props: ProductPageProps) {
       >
         {categories?.map((category) => {
           return (
-            <option key={category.id} value={category.id}>
+            <option
+              key={category.id}
+              value={category.id}
+              selected={category.id === inputProduct.categoryId}
+            >
               {category.title}
             </option>
           );
@@ -80,9 +113,11 @@ export function ProductPage(props: ProductPageProps) {
       <br />
       <input
         type="button"
-        value="Add"
+        value={inputType === "add" ? "Add" : "Update"}
         onClick={() => {
-          onAddProduct(inputProduct);
+          inputType === "add"
+            ? onAddProduct(inputProduct)
+            : onEditProduct(inputProduct);
         }}
       ></input>
       <table>
@@ -102,7 +137,7 @@ export function ProductPage(props: ProductPageProps) {
                 <td>{product.id}</td>
                 <td>{product.title}</td>
                 <td>{product.price}</td>
-                <td>{product.categoryId}</td>
+                <td>{categoryTitle(product)}</td>
                 <td>
                   <input
                     type="button"
@@ -121,11 +156,16 @@ export function ProductPage(props: ProductPageProps) {
                   <input
                     type="button"
                     value="Edit"
-                    // onClick={() => {
-                    //   setIdEdit(category.id);
-                    //   setInput(category.title);
-                    //   setInputType("edit");
-                    // }}
+                    onClick={() => {
+                      setEditProduct(product.id);
+                      setInputType("edit");
+                      setInputProduct({
+                        id: product.id,
+                        title: product.title,
+                        price: product.price,
+                        categoryId: product.categoryId,
+                      });
+                    }}
                   ></input>
                 </td>
               </tr>

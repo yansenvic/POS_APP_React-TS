@@ -36,6 +36,19 @@ export function deleteProduct(props: Product) {
   });
 }
 
+export function editProduct(props: Product) {
+  return fetch(`http://localhost:3000/product/` + props.id, {
+    method: "PUT",
+    body: JSON.stringify({
+      id: props.id,
+      title: props.title,
+      price: props.price,
+      categoryId: props.categoryId,
+    }),
+    headers: { "Content-type": "application/json; charset=UTF-8" },
+  });
+}
+
 export function useFetchProduct() {
   const [products, setProducts] = useState<Product[]>();
   const [isLoadingFetchProduct, setIsLoadingFetchProduct] = useState(false);
@@ -68,4 +81,13 @@ export function useDeleteProduct() {
     return deleteProduct(props).then(() => setIsLoadingDelete(false));
   }
   return { isLoadingDelete, delProduct };
+}
+
+export function useEditProduct() {
+  const [isLoadingEdit, setIsLoadingEdit] = useState(false);
+  function updateProduct(props: Product) {
+    setIsLoadingEdit(true);
+    return editProduct(props).then(() => setIsLoadingEdit(false));
+  }
+  return { isLoadingEdit, updateProduct };
 }
