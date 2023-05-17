@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { NavBar } from "../component/NavBar";
 import {
+  Category,
   useCreateCategory,
   useDeleteCategory,
+  useEditCategory,
   useFetchCategories,
 } from "../domain/categories";
 
@@ -12,11 +14,34 @@ type CategoryPageProps = {
   ProductClick: () => void;
 };
 
+type InputType = "input" | "edit";
+
 export function CategoryPage(props: CategoryPageProps) {
   const [input, setInput] = useState("");
+  const [inputType, setInputType] = useState<InputType>("input");
   const { categories, reFetch, isLoadingFetch } = useFetchCategories();
+  const [idEdit, setIdEdit] = useState<number>(
+    categories ? categories[categories?.length - 1].id + 1 : 1
+  );
   const { isLoadingCreate, submit } = useCreateCategory();
   const { isLoadingDelete, delCategory } = useDeleteCategory();
+  const { isLoadingEdit, updateCategory } = useEditCategory();
+
+  function onAddCategory(input: string) {
+    const id = categories ? categories[categories?.length - 1].id + 1 : 1;
+    submit({ id: id, title: input }).then(() => {
+      setInput("");
+      reFetch();
+    });
+  }
+  function onEditCategory(props: Category) {
+    updateCategory({ id: props.id, title: props.title }).then(() => {
+      setInputType("input");
+      setInput("");
+      setIdEdit(0);
+      reFetch();
+    });
+  }
   return (
     <div>
       <NavBar
@@ -25,7 +50,7 @@ export function CategoryPage(props: CategoryPageProps) {
         onClickProduct={props.ProductClick}
       />
       <p>Welcome to Category Page</p>
-      <span>Input New Category : </span>
+      <span>Category Name : </span>
       <input
         type="text"
         id="inputCategory"
@@ -34,19 +59,21 @@ export function CategoryPage(props: CategoryPageProps) {
       ></input>
       <input
         type="button"
-        value="Add"
+        value={inputType === "input" ? "Add" : "Update"}
         onClick={() => {
-          const id = categories ? categories[categories?.length - 1].id + 1 : 1;
-          submit({ id: id, title: input }).then(() => {
-            setInput("");
-            reFetch();
-          });
+          inputType === "input"
+            ? onAddCategory(input)
+            : onEditCategory({ id: idEdit, title: input });
         }}
       ></input>
-      <table>
+      <table
+        style={
+          inputType === "edit" ? { display: "none" } : { display: "table" }
+        }
+      >
         <thead>
           <tr>
-            <th>ID</th>
+            <th>ID Category</th>
             <th>Title</th>
             <th>Action</th>
           </tr>
@@ -73,9 +100,11 @@ export function CategoryPage(props: CategoryPageProps) {
                   <input
                     type="button"
                     value="Edit"
-                    onClick={() =>
-                      console.log(`${category.id} + ${category.title} `)
-                    }
+                    onClick={() => {
+                      setIdEdit(category.id);
+                      setInput(category.title);
+                      setInputType("edit");
+                    }}
                   ></input>
                 </td>
               </tr>

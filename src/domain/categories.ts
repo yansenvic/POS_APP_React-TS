@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { CategoryPage } from "../screen/CategoryPage";
 
 export type Category = {
   id: number;
@@ -23,15 +22,24 @@ export function postCategory(props: Category) {
       id: props.id,
       title: props.title,
     }),
-    headers: {
-      "Content-type": "application/json; charset=UTF-8",
-    },
+    headers: { "Content-type": "application/json; charset=UTF-8" },
   });
 }
 
 export function deleteCategory(props: Category) {
   return fetch(`http://localhost:3000/category/` + props.id, {
     method: "DELETE",
+  });
+}
+
+export function editCategory(props: Category) {
+  return fetch(`http://localhost:3000/category/` + props.id, {
+    method: "PUT",
+    body: JSON.stringify({
+      id: props.id,
+      title: props.title,
+    }),
+    headers: { "Content-type": "application/json; charset=UTF-8" },
   });
 }
 
@@ -70,4 +78,13 @@ export function useDeleteCategory() {
     return deleteCategory(props).then(() => setIsLoadingDelete(false));
   }
   return { isLoadingDelete, delCategory };
+}
+
+export function useEditCategory() {
+  const [isLoadingEdit, setIsLoadingEdit] = useState(false);
+  function updateCategory(props: Category) {
+    setIsLoadingEdit(true);
+    return editCategory(props).then(() => setIsLoadingEdit(false));
+  }
+  return { isLoadingEdit, updateCategory };
 }
