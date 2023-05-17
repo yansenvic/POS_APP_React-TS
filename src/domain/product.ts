@@ -5,6 +5,10 @@ export type Product = {
   title: string;
   price: number;
   categoryId: number;
+  name: {
+    fName: string;
+    LName: string;
+  };
 };
 
 export function fetchData() {

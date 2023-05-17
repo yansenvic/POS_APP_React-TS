@@ -15,16 +15,15 @@ type ProductPageProps = {
   ProductClick: () => void;
 };
 
+type ProductForm = Omit<Product, "id"> & { price?: number };
+
 type InputType = "add" | "edit";
 
 export function ProductPage(props: ProductPageProps) {
-  const [inputProduct, setInputProduct] = useState<Product>({} as Product);
+  const [inputProduct, setInputProduct] = useState<Product>();
   const [inputType, setInputType] = useState<InputType>("add");
-  const [inputCategoryProduct, setInputCategoryProduct] = useState<number>();
+  const [selectedIdProduct, setSelectedIdProduct] = useState<number>();
   const { products, reFetchProduct, isLoadingFetchProduct } = useFetchProduct();
-  const [editProduct, setEditProduct] = useState<number>(
-    products ? products[products.length - 1].id + 1 : 1
-  );
   const { categories, reFetch, isLoadingFetch } = useFetchCategories();
   const { isLoadingCreate, submit } = useCreateProduct();
   const { delProduct, isLoadingDelete } = useDeleteProduct();
@@ -52,7 +51,7 @@ export function ProductPage(props: ProductPageProps) {
   }
 
   function categoryTitle(props: Product) {
-    const nameCategory = categories?.find(
+    const nameCategory = categories.find(
       (category) => category.id === props.categoryId
     );
     return nameCategory?.title;
@@ -98,7 +97,10 @@ export function ProductPage(props: ProductPageProps) {
           setInputProduct(newCategoryId);
         }}
       >
-        {categories?.map((category) => {
+        <option defaultChecked disabled>
+          Pilih Category
+        </option>
+        {categories.map((category) => {
           return (
             <option
               key={category.id}
@@ -157,7 +159,7 @@ export function ProductPage(props: ProductPageProps) {
                     type="button"
                     value="Edit"
                     onClick={() => {
-                      setEditProduct(product.id);
+                      setSelectedIdProduct(product.id);
                       setInputType("edit");
                       setInputProduct({
                         id: product.id,

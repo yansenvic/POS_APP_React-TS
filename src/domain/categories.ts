@@ -45,7 +45,7 @@ export function editCategory(props: Category) {
 
 //ini namanya custom hooks
 export function useFetchCategories() {
-  const [categories, setCategories] = useState<Category[]>();
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingFetch, setIsLoadingFetch] = useState(false);
   useEffect(() => {
     fetchData().then((categories) => {
