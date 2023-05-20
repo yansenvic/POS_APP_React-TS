@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavBar } from "../component/NavBar";
 import {
   Category,
+  CategoryRequest,
   useCreateCategory,
   useDeleteCategory,
   useEditCategory,
@@ -19,17 +20,16 @@ type InputType = "input" | "edit";
 export function CategoryPage(props: CategoryPageProps) {
   const [input, setInput] = useState("");
   const [inputType, setInputType] = useState<InputType>("input");
-  const { categories, reFetch, isLoadingFetch } = useFetchCategories();
-  const [idEdit, setIdEdit] = useState<number>(
-    categories ? categories[categories?.length - 1].id + 1 : 1
-  );
-  const { isLoadingCreate, submit } = useCreateCategory();
-  const { isLoadingDelete, delCategory } = useDeleteCategory();
-  const { isLoadingEdit, updateCategory } = useEditCategory();
+  const [idEdit, setIdEdit] = useState<number>(0);
+  const { categories, errorMassageFetch, reFetch, isLoadingFetch } =
+    useFetchCategories();
+  const { isLoadingCreate, errorMassageCreate, submit } = useCreateCategory();
+  const { isLoadingDelete, errorMassageDelete, delCategory } =
+    useDeleteCategory();
+  const { isLoadingEdit, errorMassageEdit, updateCategory } = useEditCategory();
 
-  function onAddCategory(input: string) {
-    const id = categories ? categories[categories?.length - 1].id + 1 : 1;
-    submit({ id: id, title: input }).then(() => {
+  function onAddCategory(props: CategoryRequest) {
+    submit({ title: props.title }).then(() => {
       setInput("");
       reFetch();
     });
@@ -62,56 +62,89 @@ export function CategoryPage(props: CategoryPageProps) {
         value={inputType === "input" ? "Add" : "Update"}
         onClick={() => {
           inputType === "input"
-            ? onAddCategory(input)
+            ? onAddCategory({ title: input })
             : onEditCategory({ id: idEdit, title: input });
         }}
       ></input>
-      <table
-        style={
-          inputType === "edit" ? { display: "none" } : { display: "table" }
+      {(function () {
+        if (
+          isLoadingFetch ||
+          isLoadingCreate ||
+          isLoadingDelete ||
+          isLoadingEdit
+        ) {
+          return <p>Data is Loading</p>;
         }
-      >
-        <thead>
-          <tr>
-            <th>ID Category</th>
-            <th>Title</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories?.map((category) => {
-            return (
-              <tr key={category.id}>
-                <td>{category.id}</td>
-                <td>{category.title}</td>
-                <td>
-                  <input
-                    type="button"
-                    value="Delete"
-                    onClick={() =>
-                      delCategory({
-                        id: category.id,
-                        title: category.title,
-                      }).then(() => {
-                        reFetch();
-                      })
-                    }
-                  ></input>
-                  <input
-                    type="button"
-                    value="Edit"
-                    onClick={() => {
-                      setIdEdit(category.id);
-                      setInput(category.title);
-                      setInputType("edit");
-                    }}
-                  ></input>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+        if (
+          errorMassageCreate ||
+          errorMassageDelete ||
+          errorMassageEdit ||
+          errorMassageFetch
+        ) {
+          return (
+            <p>
+              {errorMassageCreate ||
+                errorMassageDelete ||
+                errorMassageEdit ||
+                errorMassageFetch}
+            </p>
+          );
+        }
+        if (categories.length === 0) {
+          return <p>Data Empty</p>;
+        } else {
+          return (
+            <table
+              style={
+                inputType === "edit"
+                  ? { display: "none" }
+                  : { display: "table" }
+              }
+            >
+              <thead>
+                <tr>
+                  <th>ID Category</th>
+                  <th>Title</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map((category) => {
+                  return (
+                    <tr key={category.id}>
+                      <td>{category.id}</td>
+                      <td>{category.title}</td>
+                      <td>
+                        <input
+                          type="button"
+                          value="Delete"
+                          onClick={() =>
+                            delCategory({
+                              id: category.id,
+                              title: category.title,
+                            }).then(() => {
+                              reFetch();
+                            })
+                          }
+                        ></input>
+                        <input
+                          type="button"
+                          value="Edit"
+                          onClick={() => {
+                            setIdEdit(category.id);
+                            setInput(category.title);
+                            setInputType("edit");
+                          }}
+                        ></input>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          );
+        }
+      })()}
     </div>
   );
 }

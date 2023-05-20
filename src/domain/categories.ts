@@ -5,21 +5,18 @@ export type Category = {
   title: string;
 };
 
+export type CategoryRequest = Omit<Category, "id">;
+
 export function fetchData() {
-  return fetch(`http://localhost:3000/category`)
-    .then((result) => {
-      return result.json();
-    })
-    .then((data: Category[]) => {
-      return [...data];
-    });
+  return fetch(`http://localhost:3000/category`).then((result) => {
+    return result.json();
+  });
 }
 
-export function postCategory(props: Category) {
+export function postCategory(props: CategoryRequest) {
   return fetch(`http://localhost:3000/category`, {
     method: "POST",
     body: JSON.stringify({
-      id: props.id,
       title: props.title,
     }),
     headers: { "Content-type": "application/json; charset=UTF-8" },
@@ -46,45 +43,78 @@ export function editCategory(props: Category) {
 //ini namanya custom hooks
 export function useFetchCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [errorMassageFetch, seterrorMassageFetch] = useState<string>("");
   const [isLoadingFetch, setIsLoadingFetch] = useState(false);
   useEffect(() => {
-    fetchData().then((categories) => {
-      setCategories(categories);
-    });
+    setIsLoadingFetch(true);
+    fetchData()
+      .then((data: Category[]) => {
+        setCategories([...data]);
+        setIsLoadingFetch(false);
+      })
+      .catch((err) => {
+        seterrorMassageFetch(`${err.message} + error in get data`);
+        setIsLoadingFetch(false);
+      });
   }, []);
   function reFetch() {
-    fetchData().then((categories) => {
-      setCategories(categories);
-    });
+    setIsLoadingFetch(true);
+    fetchData()
+      .then((data: Category[]) => {
+        setCategories([...data]);
+        setIsLoadingFetch(false);
+      })
+      .catch((err) => {
+        seterrorMassageFetch(`${err.message} + error in get data`);
+        setIsLoadingFetch(false);
+      });
   }
-  return { categories, reFetch, isLoadingFetch };
+  return { categories, errorMassageFetch, reFetch, isLoadingFetch };
 }
 
 export function useCreateCategory() {
   const [isLoadingCreate, setIsLoadingCreate] = useState(false);
-  function submit(props: Category) {
+  const [errorMassageCreate, seterrorMassageCreate] = useState("");
+  function submit(props: CategoryRequest) {
     setIsLoadingCreate(true);
-    return postCategory(props).then(() => {
-      setIsLoadingCreate(false);
-    });
+    return postCategory(props)
+      .then(() => {
+        setIsLoadingCreate(false);
+      })
+      .catch((err) => {
+        seterrorMassageCreate(`${err.message} + error in create`);
+        setIsLoadingCreate(false);
+      });
   }
-  return { isLoadingCreate, submit };
+  return { isLoadingCreate, errorMassageCreate, submit };
 }
 
 export function useDeleteCategory() {
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
+  const [errorMassageDelete, setErrorMassageDelete] = useState("");
   function delCategory(props: Category) {
     setIsLoadingDelete(true);
-    return deleteCategory(props).then(() => setIsLoadingDelete(false));
+    return deleteCategory(props)
+      .then(() => setIsLoadingDelete(false))
+      .catch((err) => {
+        setErrorMassageDelete(`${err.message} + error in delete`);
+        setIsLoadingDelete(false);
+      });
   }
-  return { isLoadingDelete, delCategory };
+  return { isLoadingDelete, errorMassageDelete, delCategory };
 }
 
 export function useEditCategory() {
   const [isLoadingEdit, setIsLoadingEdit] = useState(false);
+  const [errorMassageEdit, setErrorMassageEdit] = useState("");
   function updateCategory(props: Category) {
     setIsLoadingEdit(true);
-    return editCategory(props).then(() => setIsLoadingEdit(false));
+    return editCategory(props)
+      .then(() => setIsLoadingEdit(false))
+      .catch((err) => {
+        setErrorMassageEdit(`${err.message} + error in edit`);
+        setIsLoadingEdit(false);
+      });
   }
-  return { isLoadingEdit, updateCategory };
+  return { isLoadingEdit, errorMassageEdit, updateCategory };
 }
