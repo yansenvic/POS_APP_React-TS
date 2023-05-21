@@ -21,12 +21,12 @@ export function CategoryPage(props: CategoryPageProps) {
   const [input, setInput] = useState("");
   const [inputType, setInputType] = useState<InputType>("input");
   const [idEdit, setIdEdit] = useState<number>(0);
-  const { categories, errorMassageFetch, reFetch, isLoadingFetch } =
+  const { categories, errorMessageFetch, reFetch, isLoadingFetch } =
     useFetchCategories();
-  const { isLoadingCreate, errorMassageCreate, submit } = useCreateCategory();
-  const { isLoadingDelete, errorMassageDelete, delCategory } =
+  const { isLoadingCreate, errorMessageCreate, submit } = useCreateCategory();
+  const { isLoadingDelete, errorMessageDelete, delCategory } =
     useDeleteCategory();
-  const { isLoadingEdit, errorMassageEdit, updateCategory } = useEditCategory();
+  const { isLoadingEdit, errorMessageEdit, updateCategory } = useEditCategory();
 
   function onAddCategory(props: CategoryRequest) {
     submit({ title: props.title }).then(() => {
@@ -74,23 +74,21 @@ export function CategoryPage(props: CategoryPageProps) {
           isLoadingEdit
         ) {
           return <p>Data is Loading</p>;
-        }
-        if (
-          errorMassageCreate ||
-          errorMassageDelete ||
-          errorMassageEdit ||
-          errorMassageFetch
+        } else if (
+          errorMessageCreate ||
+          errorMessageDelete ||
+          errorMessageEdit ||
+          errorMessageFetch
         ) {
           return (
             <p>
-              {errorMassageCreate ||
-                errorMassageDelete ||
-                errorMassageEdit ||
-                errorMassageFetch}
+              {errorMessageCreate ||
+                errorMessageDelete ||
+                errorMessageEdit ||
+                errorMessageFetch}
             </p>
           );
-        }
-        if (categories.length === 0) {
+        } else if (categories.length === 0) {
           return <p>Data Empty</p>;
         } else {
           return (

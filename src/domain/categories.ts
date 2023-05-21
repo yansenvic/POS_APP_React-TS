@@ -43,7 +43,7 @@ export function editCategory(props: Category) {
 //ini namanya custom hooks
 export function useFetchCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [errorMassageFetch, seterrorMassageFetch] = useState<string>("");
+  const [errorMessageFetch, seterrorMessageFetch] = useState<string>("");
   const [isLoadingFetch, setIsLoadingFetch] = useState(false);
   useEffect(() => {
     setIsLoadingFetch(true);
@@ -53,7 +53,8 @@ export function useFetchCategories() {
         setIsLoadingFetch(false);
       })
       .catch((err) => {
-        seterrorMassageFetch(`${err.message} + error in get data`);
+        setCategories([]);
+        seterrorMessageFetch(`${err.message} + error in get data`);
         setIsLoadingFetch(false);
       });
   }, []);
@@ -65,16 +66,17 @@ export function useFetchCategories() {
         setIsLoadingFetch(false);
       })
       .catch((err) => {
-        seterrorMassageFetch(`${err.message} + error in get data`);
+        setCategories([]);
+        seterrorMessageFetch(`${err.message} + error in get data`);
         setIsLoadingFetch(false);
       });
   }
-  return { categories, errorMassageFetch, reFetch, isLoadingFetch };
+  return { categories, errorMessageFetch, reFetch, isLoadingFetch };
 }
 
 export function useCreateCategory() {
   const [isLoadingCreate, setIsLoadingCreate] = useState(false);
-  const [errorMassageCreate, seterrorMassageCreate] = useState("");
+  const [errorMessageCreate, seterrorMessageCreate] = useState("");
   function submit(props: CategoryRequest) {
     setIsLoadingCreate(true);
     return postCategory(props)
@@ -82,39 +84,39 @@ export function useCreateCategory() {
         setIsLoadingCreate(false);
       })
       .catch((err) => {
-        seterrorMassageCreate(`${err.message} + error in create`);
+        seterrorMessageCreate(`${err.message} + error in create`);
         setIsLoadingCreate(false);
       });
   }
-  return { isLoadingCreate, errorMassageCreate, submit };
+  return { isLoadingCreate, errorMessageCreate, submit };
 }
 
 export function useDeleteCategory() {
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
-  const [errorMassageDelete, setErrorMassageDelete] = useState("");
+  const [errorMessageDelete, setErrorMessageDelete] = useState("");
   function delCategory(props: Category) {
     setIsLoadingDelete(true);
     return deleteCategory(props)
       .then(() => setIsLoadingDelete(false))
       .catch((err) => {
-        setErrorMassageDelete(`${err.message} + error in delete`);
+        setErrorMessageDelete(`${err.message} + error in delete`);
         setIsLoadingDelete(false);
       });
   }
-  return { isLoadingDelete, errorMassageDelete, delCategory };
+  return { isLoadingDelete, errorMessageDelete, delCategory };
 }
 
 export function useEditCategory() {
   const [isLoadingEdit, setIsLoadingEdit] = useState(false);
-  const [errorMassageEdit, setErrorMassageEdit] = useState("");
+  const [errorMessageEdit, setErrorMessageEdit] = useState("");
   function updateCategory(props: Category) {
     setIsLoadingEdit(true);
     return editCategory(props)
       .then(() => setIsLoadingEdit(false))
       .catch((err) => {
-        setErrorMassageEdit(`${err.message} + error in edit`);
+        setErrorMessageEdit(`${err.message} + error in edit`);
         setIsLoadingEdit(false);
       });
   }
-  return { isLoadingEdit, errorMassageEdit, updateCategory };
+  return { isLoadingEdit, errorMessageEdit, updateCategory };
 }

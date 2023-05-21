@@ -20,42 +20,61 @@ type ProductForm = Omit<Product, "id"> & { price?: number };
 type InputType = "add" | "edit";
 
 export function ProductPage(props: ProductPageProps) {
-  const [inputProduct, setInputProduct] = useState<ProductForm | null>(null);
-  const [product, setProduct] = useState<Product | null>(null); // contoh
+  const [inputProduct, setInputProduct] = useState<ProductForm>({
+    title: "",
+    categoryId: 1,
+    price: 0,
+  });
+  // const [product, setProduct] = useState<Product | null>(null); // contoh
   const [inputType, setInputType] = useState<InputType>("add");
-  const [selectedIdProduct, setSelectedIdProduct] = useState<number>();
-  const { products, reFetchProduct, isLoadingFetchProduct } = useFetchProduct();
-  const { categories, reFetch, isLoadingFetch } = useFetchCategories();
-  const { isLoadingCreate, submit } = useCreateProduct();
-  const { delProduct, isLoadingDelete } = useDeleteProduct();
-  const { isLoadingEdit, updateProduct } = useEditProduct();
+  const [idEditProduct, setIdEditProduct] = useState<number>(0);
+  const {
+    products,
+    errorMassageFetchProduct,
+    reFetchProduct,
+    isLoadingFetchProduct,
+  } = useFetchProduct();
+  const { categories, errorMessageFetch, isLoadingFetch } =
+    useFetchCategories();
+  const { isLoadingCreate, errorMessageCreate, submit } = useCreateProduct();
+  const { delProduct, errorMessageDelete, isLoadingDelete } =
+    useDeleteProduct();
+  const { isLoadingEdit, errorMessageEdit, updateProduct } = useEditProduct();
 
-  function onAddProduct(props: Product) {
-    const id = products ? products[products.length - 1].id + 1 : 1;
-    const newProduct = { ...props, id: id };
+  function onAddProduct(props: ProductForm) {
+    const newProduct = { ...props };
     submit(newProduct).then(() => {
+      setInputProduct({
+        title: "",
+        categoryId: 1,
+        price: 0,
+      });
       reFetchProduct();
     });
   }
 
-  function onEditProduct(props: Product) {
+  function onEditProduct(props: ProductForm) {
     updateProduct({
-      id: props.id,
+      id: idEditProduct,
       title: props.title,
       price: props.price,
       categoryId: props.categoryId,
     }).then(() => {
-      const blankProduct = {} as Product;
-      setInputProduct(blankProduct);
+      setInputProduct({
+        title: "",
+        categoryId: 1,
+        price: 0,
+      });
+      setIdEditProduct(0);
       reFetchProduct();
     });
   }
 
-  function categoryTitle(props: Product) {
+  function categoryTitle(categoryId: number) {
     const nameCategory = categories.find(
-      (category) => category.id === props.categoryId
+      (category) => category.id === categoryId
     );
-    return nameCategory?.title;
+    if (nameCategory) return nameCategory.title;
   }
   return (
     <div>
@@ -69,10 +88,10 @@ export function ProductPage(props: ProductPageProps) {
       <input
         type="text"
         id="inputProduct"
-        value={inputProduct?.title}
+        value={inputProduct.title}
         onChange={(e) => {
-          // const newTitle = { ...inputProduct, title: e.target.value };
-          // setInputProduct(newTitle);
+          const newTitle = { ...inputProduct, title: e.target.value };
+          setInputProduct(newTitle);
         }}
       ></input>
       <br />
@@ -80,34 +99,28 @@ export function ProductPage(props: ProductPageProps) {
       <input
         type="number"
         id="inputProduct"
-        value={inputProduct?.price}
+        value={inputProduct.price === 0 ? "" : inputProduct.price}
         onChange={(e) => {
-          // const newPrice = { ...inputProduct, price: Number(e.target.value) };
-          // setInputProduct(newPrice);
+          const newPrice = { ...inputProduct, price: Number(e.target.value) };
+          setInputProduct(newPrice);
         }}
       ></input>
       <br />
       <label htmlFor="inputCategoryProduct">Category Product : </label>
       <select
+        value={inputProduct.categoryId}
         id="inputCategoryProduct"
         onChange={(e) => {
-          // const newCategoryId = {
-          //   ...inputProduct,
-          //   categoryId: Number(e.target.value),
-          // };
-          // setInputProduct(newCategoryId);
+          const newCategoryId = {
+            ...inputProduct,
+            categoryId: Number(e.target.value),
+          };
+          setInputProduct(newCategoryId);
         }}
       >
-        <option defaultChecked disabled>
-          --Pilih Category--
-        </option>
         {categories.map((category) => {
           return (
-            <option
-              key={category.id}
-              value={category.id}
-              selected={category.id === inputProduct?.categoryId}
-            >
+            <option key={category.id} value={category.id}>
               {category.title}
             </option>
           );
@@ -118,63 +131,95 @@ export function ProductPage(props: ProductPageProps) {
         type="button"
         value={inputType === "add" ? "Add" : "Update"}
         onClick={() => {
-          // inputType === "add"
-          //   ? onAddProduct(inputProduct)
-          //   : onEditProduct(inputProduct);
+          inputType === "add"
+            ? onAddProduct(inputProduct)
+            : onEditProduct(inputProduct);
         }}
       ></input>
-      <table>
-        <thead>
-          <tr>
-            <th>ID Product</th>
-            <th>Title</th>
-            <th>Price</th>
-            <th>Category</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products?.map((product) => {
-            return (
-              <tr key={product.id}>
-                <td>{product.id}</td>
-                <td>{product.title}</td>
-                <td>{product.price}</td>
-                <td>{categoryTitle(product)}</td>
-                <td>
-                  <input
-                    type="button"
-                    value="Delete"
-                    onClick={() =>
-                      delProduct({
-                        id: product.id,
-                        title: product.title,
-                        price: product.price,
-                        categoryId: product.categoryId,
-                      }).then(() => {
-                        reFetchProduct();
-                      })
-                    }
-                  ></input>
-                  <input
-                    type="button"
-                    value="Edit"
-                    onClick={() => {
-                      setSelectedIdProduct(product.id);
-                      setInputType("edit");
-                      setInputProduct({
-                        title: product.title,
-                        price: product.price,
-                        categoryId: product.categoryId,
-                      });
-                    }}
-                  ></input>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      {(function () {
+        if (
+          isLoadingCreate ||
+          isLoadingDelete ||
+          isLoadingEdit ||
+          isLoadingFetchProduct ||
+          isLoadingFetch
+        ) {
+          return <p>Data is Loading</p>;
+        } else if (
+          errorMessageCreate ||
+          errorMessageDelete ||
+          errorMessageEdit ||
+          errorMassageFetchProduct ||
+          errorMessageFetch
+        ) {
+          return (
+            <p>
+              {errorMessageCreate ||
+                errorMessageDelete ||
+                errorMessageEdit ||
+                errorMassageFetchProduct ||
+                errorMessageFetch}
+            </p>
+          );
+        } else if (products.length === 0) {
+          return <p>Data is Empty</p>;
+        } else {
+          return (
+            <table>
+              <thead>
+                <tr>
+                  <th>ID Product</th>
+                  <th>Title</th>
+                  <th>Price</th>
+                  <th>Category</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product) => {
+                  return (
+                    <tr key={product.id}>
+                      <td>{product.id}</td>
+                      <td>{product.title}</td>
+                      <td>{product.price}</td>
+                      <td>{categoryTitle(product.categoryId)}</td>
+                      <td>
+                        <input
+                          type="button"
+                          value="Delete"
+                          onClick={() =>
+                            delProduct({
+                              id: product.id,
+                              title: product.title,
+                              price: product.price,
+                              categoryId: product.categoryId,
+                            }).then(() => {
+                              reFetchProduct();
+                            })
+                          }
+                        ></input>
+                        <input
+                          type="button"
+                          value="Edit"
+                          onClick={() => {
+                            setIdEditProduct(product.id);
+                            setInputType("edit");
+                            setInputProduct({
+                              title: product.title,
+                              price: product.price,
+                              categoryId: product.categoryId,
+                            });
+                          }}
+                        ></input>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          );
+        }
+      })()}
     </div>
   );
 }
