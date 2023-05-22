@@ -1,13 +1,15 @@
 import { NavBar } from "../component/NavBar";
 import { useState } from "react";
-import { useFetchCategories } from "../domain/categories";
+import { Category, useFetchCategories } from "../domain/categories";
 import {
   Product,
   useCreateProduct,
   useFetchProduct,
   useDeleteProduct,
   useEditProduct,
+  ProductRequest,
 } from "../domain/product";
+import { FetchCategories } from "./CategoryPage";
 
 type ProductPageProps = {
   HomeClick: () => void;
@@ -15,9 +17,34 @@ type ProductPageProps = {
   ProductClick: () => void;
 };
 
-type ProductForm = Omit<Product, "id"> & { price?: number };
+type ProductForm = Omit<Product, "id">;
 
 type InputType = "add" | "edit";
+
+type FetchProduct = {
+  products: Product[];
+  reFetch: () => void;
+  errorMassage: string;
+  isLoading: boolean;
+};
+
+type CreateProduct = {
+  isLoading: boolean;
+  errorMessage: string;
+  submit: (props: ProductRequest) => Promise<void>;
+};
+
+type DeleteProduct = {
+  isLoading: boolean;
+  errorMessage: string;
+  delProduct: (props: Product) => Promise<void>;
+};
+
+type EditProduct = {
+  isLoading: boolean;
+  errorMessage: string;
+  updateProduct: (props: Product) => Promise<void>;
+};
 
 export function ProductPage(props: ProductPageProps) {
   const [inputProduct, setInputProduct] = useState<ProductForm>({
@@ -27,52 +54,51 @@ export function ProductPage(props: ProductPageProps) {
   });
   // const [product, setProduct] = useState<Product | null>(null); // contoh
   const [inputType, setInputType] = useState<InputType>("add");
-  const [idEditProduct, setIdEditProduct] = useState<number>(0);
-  const {
-    products,
-    errorMassageFetchProduct,
-    reFetchProduct,
-    isLoadingFetchProduct,
-  } = useFetchProduct();
-  const { categories, errorMessageFetch, isLoadingFetch } =
-    useFetchCategories();
-  const { isLoadingCreate, errorMessageCreate, submit } = useCreateProduct();
-  const { delProduct, errorMessageDelete, isLoadingDelete } =
-    useDeleteProduct();
-  const { isLoadingEdit, errorMessageEdit, updateProduct } = useEditProduct();
+  const [idEditProduct, setIdEditProduct] = useState<number | null>(null);
+  const fetchProduct: FetchProduct = useFetchProduct();
+  const fetchCategories: FetchCategories = useFetchCategories();
+  const createProduct: CreateProduct = useCreateProduct();
+  const deleteProduct: DeleteProduct = useDeleteProduct();
+  const editProduct: EditProduct = useEditProduct();
 
   function onAddProduct(props: ProductForm) {
     const newProduct = { ...props };
-    submit(newProduct).then(() => {
+    createProduct.submit(newProduct).then(() => {
       setInputProduct({
         title: "",
         categoryId: 1,
         price: 0,
       });
-      reFetchProduct();
+      fetchProduct.reFetch();
     });
   }
 
   function onEditProduct(props: ProductForm) {
-    updateProduct({
-      id: idEditProduct,
-      title: props.title,
-      price: props.price,
-      categoryId: props.categoryId,
-    }).then(() => {
-      setInputProduct({
-        title: "",
-        categoryId: 1,
-        price: 0,
+    // if (idEditProduct) {
+    if (!idEditProduct) return;
+    editProduct
+      .updateProduct({
+        id: idEditProduct,
+        title: props.title,
+        price: props.price,
+        categoryId: props.categoryId,
+      })
+      .then(() => {
+        setInputType("add");
+        setInputProduct({
+          title: "",
+          categoryId: 1,
+          price: 0,
+        });
+        setIdEditProduct(null);
+        fetchProduct.reFetch();
       });
-      setIdEditProduct(0);
-      reFetchProduct();
-    });
+    // }
   }
 
   function categoryTitle(categoryId: number) {
-    const nameCategory = categories.find(
-      (category) => category.id === categoryId
+    const nameCategory = fetchCategories.categories.find(
+      (category: Category) => category.id === categoryId
     );
     if (nameCategory) return nameCategory.title;
   }
@@ -118,7 +144,7 @@ export function ProductPage(props: ProductPageProps) {
           setInputProduct(newCategoryId);
         }}
       >
-        {categories.map((category) => {
+        {fetchCategories.categories.map((category: Category) => {
           return (
             <option key={category.id} value={category.id}>
               {category.title}
@@ -130,6 +156,7 @@ export function ProductPage(props: ProductPageProps) {
       <input
         type="button"
         value={inputType === "add" ? "Add" : "Update"}
+        disabled={createProduct.isLoading ? true : false}
         onClick={() => {
           inputType === "add"
             ? onAddProduct(inputProduct)
@@ -137,31 +164,25 @@ export function ProductPage(props: ProductPageProps) {
         }}
       ></input>
       {(function () {
-        if (
-          isLoadingCreate ||
-          isLoadingDelete ||
-          isLoadingEdit ||
-          isLoadingFetchProduct ||
-          isLoadingFetch
-        ) {
+        if (fetchProduct.isLoading || fetchCategories.isLoading) {
           return <p>Data is Loading</p>;
         } else if (
-          errorMessageCreate ||
-          errorMessageDelete ||
-          errorMessageEdit ||
-          errorMassageFetchProduct ||
-          errorMessageFetch
+          createProduct.errorMessage ||
+          deleteProduct.errorMessage ||
+          editProduct.errorMessage ||
+          fetchProduct.errorMassage ||
+          fetchCategories.errorMessage
         ) {
           return (
             <p>
-              {errorMessageCreate ||
-                errorMessageDelete ||
-                errorMessageEdit ||
-                errorMassageFetchProduct ||
-                errorMessageFetch}
+              {createProduct.errorMessage ||
+                deleteProduct.errorMessage ||
+                editProduct.errorMessage ||
+                fetchProduct.errorMassage ||
+                fetchCategories.errorMessage}
             </p>
           );
-        } else if (products.length === 0) {
+        } else if (fetchProduct.products.length === 0) {
           return <p>Data is Empty</p>;
         } else {
           return (
@@ -176,7 +197,7 @@ export function ProductPage(props: ProductPageProps) {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) => {
+                {fetchProduct.products.map((product) => {
                   return (
                     <tr key={product.id}>
                       <td>{product.id}</td>
@@ -187,20 +208,36 @@ export function ProductPage(props: ProductPageProps) {
                         <input
                           type="button"
                           value="Delete"
+                          disabled={
+                            deleteProduct.isLoading
+                              ? true
+                              : inputType === "edit"
+                              ? true
+                              : false
+                          }
                           onClick={() =>
-                            delProduct({
-                              id: product.id,
-                              title: product.title,
-                              price: product.price,
-                              categoryId: product.categoryId,
-                            }).then(() => {
-                              reFetchProduct();
-                            })
+                            deleteProduct
+                              .delProduct({
+                                id: product.id,
+                                title: product.title,
+                                price: product.price,
+                                categoryId: product.categoryId,
+                              })
+                              .then(() => {
+                                fetchProduct.reFetch();
+                              })
                           }
                         ></input>
                         <input
                           type="button"
                           value="Edit"
+                          disabled={
+                            editProduct.isLoading
+                              ? true
+                              : inputType === "edit"
+                              ? true
+                              : false
+                          }
                           onClick={() => {
                             setIdEditProduct(product.id);
                             setInputType("edit");

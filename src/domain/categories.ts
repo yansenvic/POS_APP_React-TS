@@ -8,9 +8,11 @@ export type Category = {
 export type CategoryRequest = Omit<Category, "id">;
 
 export function fetchData() {
-  return fetch(`http://localhost:3000/category`).then((result) => {
-    return result.json();
-  });
+  return fetch(`http://localhost:3000/category`)
+    .then((result) => {
+      return result.json();
+    })
+    .then((data: Category[]) => data);
 }
 
 export function postCategory(props: CategoryRequest) {
@@ -43,80 +45,72 @@ export function editCategory(props: Category) {
 //ini namanya custom hooks
 export function useFetchCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [errorMessageFetch, seterrorMessageFetch] = useState<string>("");
-  const [isLoadingFetch, setIsLoadingFetch] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
-    setIsLoadingFetch(true);
+    setIsLoading(true);
     fetchData()
-      .then((data: Category[]) => {
-        setCategories([...data]);
-        setIsLoadingFetch(false);
+      .then((data) => {
+        setCategories(data);
+        setErrorMessage("");
       })
       .catch((err) => {
         setCategories([]);
-        seterrorMessageFetch(`${err.message} + error in get data`);
-        setIsLoadingFetch(false);
-      });
+        setErrorMessage(`${err.message} + error in get data`);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
   function reFetch() {
-    setIsLoadingFetch(true);
+    setIsLoading(true);
     fetchData()
-      .then((data: Category[]) => {
-        setCategories([...data]);
-        setIsLoadingFetch(false);
+      .then((data) => {
+        setCategories(data);
+        setErrorMessage("");
       })
       .catch((err) => {
         setCategories([]);
-        seterrorMessageFetch(`${err.message} + error in get data`);
-        setIsLoadingFetch(false);
-      });
+        setErrorMessage(`${err.message} + error in get data`);
+      })
+      .finally(() => setIsLoading(false));
   }
-  return { categories, errorMessageFetch, reFetch, isLoadingFetch };
+  return { categories, errorMessage, reFetch, isLoading };
 }
 
 export function useCreateCategory() {
-  const [isLoadingCreate, setIsLoadingCreate] = useState(false);
-  const [errorMessageCreate, seterrorMessageCreate] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, seterrorMessage] = useState("");
   function submit(props: CategoryRequest) {
-    setIsLoadingCreate(true);
+    setIsLoading(true);
     return postCategory(props)
-      .then(() => {
-        setIsLoadingCreate(false);
-      })
-      .catch((err) => {
-        seterrorMessageCreate(`${err.message} + error in create`);
-        setIsLoadingCreate(false);
-      });
+      .then(() => seterrorMessage(""))
+      .catch((err) => seterrorMessage(`${err.message} + error in create`))
+      .finally(() => setIsLoading(false));
   }
-  return { isLoadingCreate, errorMessageCreate, submit };
+  return { isLoading, errorMessage, submit };
 }
 
 export function useDeleteCategory() {
-  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
-  const [errorMessageDelete, setErrorMessageDelete] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   function delCategory(props: Category) {
-    setIsLoadingDelete(true);
+    setIsLoading(true);
     return deleteCategory(props)
-      .then(() => setIsLoadingDelete(false))
-      .catch((err) => {
-        setErrorMessageDelete(`${err.message} + error in delete`);
-        setIsLoadingDelete(false);
-      });
+      .then(() => setErrorMessage(""))
+      .catch((err) => setErrorMessage(`${err.message} + error in delete`))
+      .finally(() => setIsLoading(false));
   }
-  return { isLoadingDelete, errorMessageDelete, delCategory };
+  return { isLoading, errorMessage, delCategory };
 }
 
 export function useEditCategory() {
-  const [isLoadingEdit, setIsLoadingEdit] = useState(false);
-  const [errorMessageEdit, setErrorMessageEdit] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   function updateCategory(props: Category) {
-    setIsLoadingEdit(true);
+    setIsLoading(true);
     return editCategory(props)
-      .then(() => setIsLoadingEdit(false))
-      .catch((err) => {
-        setErrorMessageEdit(`${err.message} + error in edit`);
-        setIsLoadingEdit(false);
-      });
+      .then(() => setErrorMessage(""))
+      .catch((err) => setErrorMessage(`${err.message} + error in edit`))
+      .finally(() => setIsLoading(false));
   }
-  return { isLoadingEdit, errorMessageEdit, updateCategory };
+  return { isLoading, errorMessage, updateCategory };
 }

@@ -10,9 +10,11 @@ export type Product = {
 export type ProductRequest = Omit<Product, "id">;
 
 export function fetchData() {
-  return fetch(`http://localhost:3000/product`).then((result) => {
-    return result.json();
-  });
+  return fetch(`http://localhost:3000/product`)
+    .then((result) => {
+      return result.json();
+    })
+    .then((data: Product[]) => data);
 }
 
 export function postProduct(props: ProductRequest) {
@@ -48,83 +50,77 @@ export function editProduct(props: Product) {
 
 export function useFetchProduct() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoadingFetchProduct, setIsLoadingFetchProduct] = useState(false);
-  const [errorMassageFetchProduct, setErrorMassageFetch] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMassage, setErrorMassage] = useState("");
   useEffect(() => {
-    setIsLoadingFetchProduct(true);
+    setIsLoading(true);
     fetchData()
-      .then((data: Product[]) => {
-        setProducts([...data]);
-        setIsLoadingFetchProduct(false);
+      .then((data) => {
+        setProducts(data);
+        setErrorMassage("");
       })
       .catch((err) => {
         setProducts([]);
-        setErrorMassageFetch(err.message);
-        setIsLoadingFetchProduct(false);
-      });
+        setErrorMassage(err.message);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
-  function reFetchProduct() {
-    setIsLoadingFetchProduct(true);
+  function reFetch() {
+    setIsLoading(true);
     fetchData()
-      .then((data: Product[]) => {
-        setProducts([...data]);
-        setIsLoadingFetchProduct(false);
+      .then((data) => {
+        setProducts(data);
+        setErrorMassage("");
       })
       .catch((err) => {
         setProducts([]);
-        setErrorMassageFetch(err.message);
-        setIsLoadingFetchProduct(false);
-      });
+        setErrorMassage(err.message);
+      })
+      .finally(() => setIsLoading(false));
   }
   return {
     products,
-    reFetchProduct,
-    errorMassageFetchProduct,
-    isLoadingFetchProduct,
+    reFetch,
+    errorMassage,
+    isLoading,
   };
 }
 
 export function useCreateProduct() {
-  const [isLoadingCreate, setIsLoadingCreate] = useState(false);
-  const [errorMessageCreate, setErrorMessageCreate] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   function submit(props: ProductRequest) {
-    setIsLoadingCreate(true);
+    setIsLoading(true);
     return postProduct(props)
-      .then(() => setIsLoadingCreate(false))
-      .catch((err) => {
-        setErrorMessageCreate(err.message);
-        setIsLoadingCreate(false);
-      });
+      .then(() => setErrorMessage(""))
+      .catch((err) => setErrorMessage(err.message))
+      .finally(() => setIsLoading(false));
   }
-  return { isLoadingCreate, errorMessageCreate, submit };
+  return { isLoading, errorMessage, submit };
 }
 
 export function useDeleteProduct() {
-  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
-  const [errorMessageDelete, setErrorMessageDelete] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   function delProduct(props: Product) {
-    setIsLoadingDelete(true);
+    setIsLoading(true);
     return deleteProduct(props)
-      .then(() => setIsLoadingDelete(false))
-      .catch((err) => {
-        setErrorMessageDelete(err.message);
-        setIsLoadingDelete(false);
-      });
+      .then(() => setErrorMessage(""))
+      .catch((err) => setErrorMessage(err.message))
+      .finally(() => setIsLoading(false));
   }
-  return { isLoadingDelete, errorMessageDelete, delProduct };
+  return { isLoading, errorMessage, delProduct };
 }
 
 export function useEditProduct() {
-  const [isLoadingEdit, setIsLoadingEdit] = useState(false);
-  const [errorMessageEdit, setErrorMessageEdit] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   function updateProduct(props: Product) {
-    setIsLoadingEdit(true);
+    setIsLoading(true);
     return editProduct(props)
-      .then(() => setIsLoadingEdit(false))
-      .catch((err) => {
-        setErrorMessageEdit(err.message);
-        setIsLoadingEdit(false);
-      });
+      .then(() => setErrorMessage(""))
+      .catch((err) => setErrorMessage(err.message))
+      .finally(() => setIsLoading(false));
   }
-  return { isLoadingEdit, errorMessageEdit, updateProduct };
+  return { isLoading, errorMessage, updateProduct };
 }
