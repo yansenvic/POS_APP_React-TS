@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { NavBar } from "../component/NavBar";
 import {
-  Category,
-  CategoryRequest,
   useCreateCategory,
   useDeleteCategory,
   useEditCategory,
@@ -15,57 +13,42 @@ type CategoryPageProps = {
   ProductClick: () => void;
 };
 
-type InputType = "input" | "edit";
+type CategoryForm =
+  | {
+      type: "add";
+      selectedId: null;
+      title: string;
+    }
+  | { type: "edit"; selectedId: number; title: string };
 
-export type FetchCategories = {
-  categories: Category[];
-  errorMessage: string;
-  isLoading: boolean;
-  reFetch: () => void;
-};
-
-type CreateCategory = {
-  isLoading: boolean;
-  errorMessage: string;
-  submit: (props: CategoryRequest) => Promise<void>;
-};
-
-type DeleteCategory = {
-  isLoading: boolean;
-  errorMessage: string;
-  delCategory: (props: Category) => Promise<void>;
-};
-
-type EditCategory = {
-  isLoading: boolean;
-  errorMessage: string;
-  updateCategory: (props: Category) => Promise<void>;
+const defaultInputCategory: CategoryForm = {
+  type: "add",
+  selectedId: null,
+  title: "",
 };
 
 export function CategoryPage(props: CategoryPageProps) {
-  const [input, setInput] = useState("");
-  const [inputType, setInputType] = useState<InputType>("input");
-  const [idEdit, setIdEdit] = useState<number | null>(null);
-  const fetchCategories: FetchCategories = useFetchCategories();
-  const createCategory: CreateCategory = useCreateCategory();
-  const deleteCategory: DeleteCategory = useDeleteCategory();
-  const editCategory: EditCategory = useEditCategory();
+  const [inputCategory, setInputCategory] =
+    useState<CategoryForm>(defaultInputCategory);
+  const fetchCategories = useFetchCategories();
+  const createCategory = useCreateCategory();
+  const deleteCategory = useDeleteCategory();
+  const editCategory = useEditCategory();
 
-  function onAddCategory(props: CategoryRequest) {
-    createCategory.submit({ title: props.title }).then(() => {
-      setInput("");
-      fetchCategories.reFetch();
-    });
-  }
-  function onEditCategory(props: Category) {
-    editCategory
-      .updateCategory({ id: props.id, title: props.title })
-      .then(() => {
-        setInputType("input");
-        setInput("");
-        setIdEdit(null);
+  function onInputCategory(props: CategoryForm) {
+    if (props.type === "add") {
+      createCategory.submit({ title: props.title }).then(() => {
+        setInputCategory(defaultInputCategory);
         fetchCategories.reFetch();
       });
+    } else if (props.type === "edit") {
+      editCategory
+        .updateCategory({ id: props.selectedId, title: props.title })
+        .then(() => {
+          setInputCategory(defaultInputCategory);
+          fetchCategories.reFetch();
+        });
+    } else return;
   }
 
   return (
@@ -80,20 +63,16 @@ export function CategoryPage(props: CategoryPageProps) {
       <input
         type="text"
         id="inputCategory"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
+        value={inputCategory.title}
+        onChange={(e) =>
+          setInputCategory({ ...inputCategory, title: e.target.value })
+        }
       ></input>
       <input
         type="button"
-        value={inputType === "input" ? "Add" : "Update"}
-        disabled={createCategory.isLoading ? true : false}
-        onClick={() => {
-          inputType === "input"
-            ? onAddCategory({ title: input })
-            : !idEdit
-            ? console.log("asd") //perlu di cari penggantinya
-            : onEditCategory({ id: idEdit, title: input });
-        }}
+        value={inputCategory.type === "add" ? "Add" : "Update"}
+        disabled={createCategory.isLoading}
+        onClick={() => onInputCategory(inputCategory)}
       ></input>
       {(function () {
         if (fetchCategories.isLoading) {
@@ -118,7 +97,7 @@ export function CategoryPage(props: CategoryPageProps) {
           return (
             <table
               style={
-                inputType === "edit"
+                inputCategory.type === "edit"
                   ? { display: "none" }
                   : { display: "table" }
               }
@@ -140,26 +119,26 @@ export function CategoryPage(props: CategoryPageProps) {
                         <input
                           type="button"
                           value="Delete"
-                          disabled={deleteCategory.isLoading ? true : false}
+                          disabled={deleteCategory.isLoading}
                           onClick={() =>
                             deleteCategory
                               .delCategory({
                                 id: category.id,
                                 title: category.title,
                               })
-                              .then(() => {
-                                fetchCategories.reFetch();
-                              })
+                              .then(fetchCategories.reFetch)
                           }
                         ></input>
                         <input
                           type="button"
                           value="Edit"
-                          disabled={editCategory.isLoading ? true : false}
+                          disabled={editCategory.isLoading}
                           onClick={() => {
-                            setIdEdit(category.id);
-                            setInput(category.title);
-                            setInputType("edit");
+                            setInputCategory({
+                              selectedId: category.id,
+                              title: category.title,
+                              type: "edit",
+                            });
                           }}
                         ></input>
                       </td>

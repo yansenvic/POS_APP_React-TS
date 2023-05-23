@@ -78,12 +78,12 @@ export function useFetchCategories() {
 
 export function useCreateCategory() {
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, seterrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   function submit(props: CategoryRequest) {
     setIsLoading(true);
     return postCategory(props)
-      .then(() => seterrorMessage(""))
-      .catch((err) => seterrorMessage(`${err.message} + error in create`))
+      .then(() => setErrorMessage(""))
+      .catch((err) => setErrorMessage(`${err.message} + error in create`))
       .finally(() => setIsLoading(false));
   }
   return { isLoading, errorMessage, submit };

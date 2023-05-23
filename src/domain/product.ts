@@ -29,8 +29,8 @@ export function postProduct(props: ProductRequest) {
   });
 }
 
-export function deleteProduct(props: Product) {
-  return fetch(`http://localhost:3000/product/` + props.id, {
+export function deleteProduct(id: number) {
+  return fetch(`http://localhost:3000/product/` + id, {
     method: "DELETE",
   });
 }
@@ -102,14 +102,14 @@ export function useCreateProduct() {
 export function useDeleteProduct() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  function delProduct(props: Product) {
+  function submit(id: number) {
     setIsLoading(true);
-    return deleteProduct(props)
+    return deleteProduct(id)
       .then(() => setErrorMessage(""))
       .catch((err) => setErrorMessage(err.message))
       .finally(() => setIsLoading(false));
   }
-  return { isLoading, errorMessage, delProduct };
+  return { isLoading, errorMessage, submit };
 }
 
 export function useEditProduct() {

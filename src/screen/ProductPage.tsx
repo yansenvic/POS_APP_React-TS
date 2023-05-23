@@ -1,6 +1,6 @@
 import { NavBar } from "../component/NavBar";
 import { useState } from "react";
-import { Category, useFetchCategories } from "../domain/categories";
+import { useFetchCategories } from "../domain/categories";
 import {
   Product,
   useCreateProduct,
@@ -9,7 +9,6 @@ import {
   useEditProduct,
   ProductRequest,
 } from "../domain/product";
-import { FetchCategories } from "./CategoryPage";
 
 type ProductPageProps = {
   HomeClick: () => void;
@@ -17,90 +16,85 @@ type ProductPageProps = {
   ProductClick: () => void;
 };
 
-type ProductForm = Omit<Product, "id">;
+type ProductForm =
+  | {
+      type: "add";
+      selectedId: null;
+      values: Omit<Product, "id">;
+    }
+  | {
+      type: "edit";
+      selectedId: number;
+      values: Omit<Product, "id">;
+    };
 
-type InputType = "add" | "edit";
-
-type FetchProduct = {
-  products: Product[];
-  reFetch: () => void;
-  errorMassage: string;
-  isLoading: boolean;
-};
-
-type CreateProduct = {
-  isLoading: boolean;
-  errorMessage: string;
-  submit: (props: ProductRequest) => Promise<void>;
-};
-
-type DeleteProduct = {
-  isLoading: boolean;
-  errorMessage: string;
-  delProduct: (props: Product) => Promise<void>;
-};
-
-type EditProduct = {
-  isLoading: boolean;
-  errorMessage: string;
-  updateProduct: (props: Product) => Promise<void>;
+const defaultInputProduct: ProductForm = {
+  type: "add",
+  selectedId: null,
+  values: {
+    categoryId: 1,
+    title: "",
+    price: 0,
+  },
 };
 
 export function ProductPage(props: ProductPageProps) {
-  const [inputProduct, setInputProduct] = useState<ProductForm>({
-    title: "",
-    categoryId: 1,
-    price: 0,
-  });
-  // const [product, setProduct] = useState<Product | null>(null); // contoh
-  const [inputType, setInputType] = useState<InputType>("add");
-  const [idEditProduct, setIdEditProduct] = useState<number | null>(null);
-  const fetchProduct: FetchProduct = useFetchProduct();
-  const fetchCategories: FetchCategories = useFetchCategories();
-  const createProduct: CreateProduct = useCreateProduct();
-  const deleteProduct: DeleteProduct = useDeleteProduct();
-  const editProduct: EditProduct = useEditProduct();
+  const [inputProduct, setInputProduct] =
+    useState<ProductForm>(defaultInputProduct);
+  const fetchProduct = useFetchProduct();
+  const fetchCategories = useFetchCategories();
+  const createProduct = useCreateProduct();
+  const deleteProduct = useDeleteProduct();
+  const editProduct = useEditProduct();
 
-  function onAddProduct(props: ProductForm) {
-    const newProduct = { ...props };
-    createProduct.submit(newProduct).then(() => {
-      setInputProduct({
-        title: "",
-        categoryId: 1,
-        price: 0,
-      });
-      fetchProduct.reFetch();
-    });
-  }
+  // function onAddProduct(props: ProductRequest) {
+  //   const newProduct = { ...props };
+  //   createProduct.submit(newProduct).then(() => {
+  //     setInputProduct(defaultInputProduct);
+  //     fetchProduct.reFetch();
+  //   });
+  // }
 
-  function onEditProduct(props: ProductForm) {
-    // if (idEditProduct) {
-    if (!idEditProduct) return;
-    editProduct
-      .updateProduct({
-        id: idEditProduct,
-        title: props.title,
-        price: props.price,
-        categoryId: props.categoryId,
-      })
-      .then(() => {
-        setInputType("add");
-        setInputProduct({
-          title: "",
-          categoryId: 1,
-          price: 0,
-        });
-        setIdEditProduct(null);
+  // function onEditProduct(props: ProductForm) {
+  //   if (!props.selectedId) return;
+  //   editProduct
+  //     .updateProduct({
+  //       id: props.selectedId,
+  //       title: props.values.title,
+  //       price: props.values.price,
+  //       categoryId: props.values.categoryId,
+  //     })
+  //     .then(() => {
+  //       setInputProduct(defaultInputProduct);
+  //       fetchProduct.reFetch();
+  //     });
+  // }
+
+  function onInputProduct(props: ProductForm) {
+    if (props.type === "add") {
+      createProduct.submit(props.values).then(() => {
+        setInputProduct(defaultInputProduct);
         fetchProduct.reFetch();
       });
-    // }
+    } else if (props.type === "edit") {
+      editProduct
+        .updateProduct({
+          id: props.selectedId,
+          title: props.values.title,
+          price: props.values.price,
+          categoryId: props.values.categoryId,
+        })
+        .then(() => {
+          setInputProduct(defaultInputProduct);
+          fetchProduct.reFetch();
+        });
+    } else return;
   }
 
-  function categoryTitle(categoryId: number) {
-    const nameCategory = fetchCategories.categories.find(
-      (category: Category) => category.id === categoryId
-    );
-    if (nameCategory) return nameCategory.title;
+  function getCategoryTitle(categoryId: number) {
+    return fetchCategories.categories.find(
+      (category) => category.id === categoryId
+    )?.title;
   }
   return (
     <div>
@@ -114,9 +108,12 @@ export function ProductPage(props: ProductPageProps) {
       <input
         type="text"
         id="inputProduct"
-        value={inputProduct.title}
+        value={inputProduct.values.title}
         onChange={(e) => {
-          const newTitle = { ...inputProduct, title: e.target.value };
+          const newTitle = {
+            ...inputProduct,
+            values: { ...inputProduct.values, title: e.target.value },
+          };
           setInputProduct(newTitle);
         }}
       ></input>
@@ -125,26 +122,32 @@ export function ProductPage(props: ProductPageProps) {
       <input
         type="number"
         id="inputProduct"
-        value={inputProduct.price === 0 ? "" : inputProduct.price}
+        value={inputProduct.values.price === 0 ? "" : inputProduct.values.price}
         onChange={(e) => {
-          const newPrice = { ...inputProduct, price: Number(e.target.value) };
+          const newPrice = {
+            ...inputProduct,
+            values: { ...inputProduct.values, price: Number(e.target.value) },
+          };
           setInputProduct(newPrice);
         }}
       ></input>
       <br />
       <label htmlFor="inputCategoryProduct">Category Product : </label>
       <select
-        value={inputProduct.categoryId}
+        value={inputProduct.values.categoryId}
         id="inputCategoryProduct"
         onChange={(e) => {
           const newCategoryId = {
             ...inputProduct,
-            categoryId: Number(e.target.value),
+            values: {
+              ...inputProduct.values,
+              categoryId: Number(e.target.value),
+            },
           };
           setInputProduct(newCategoryId);
         }}
       >
-        {fetchCategories.categories.map((category: Category) => {
+        {fetchCategories.categories.map((category) => {
           return (
             <option key={category.id} value={category.id}>
               {category.title}
@@ -155,13 +158,9 @@ export function ProductPage(props: ProductPageProps) {
       <br />
       <input
         type="button"
-        value={inputType === "add" ? "Add" : "Update"}
-        disabled={createProduct.isLoading ? true : false}
-        onClick={() => {
-          inputType === "add"
-            ? onAddProduct(inputProduct)
-            : onEditProduct(inputProduct);
-        }}
+        value={inputProduct.type === "add" ? "Add" : "Update"}
+        disabled={createProduct.isLoading}
+        onClick={() => onInputProduct(inputProduct)}
       ></input>
       {(function () {
         if (fetchProduct.isLoading || fetchCategories.isLoading) {
@@ -203,48 +202,37 @@ export function ProductPage(props: ProductPageProps) {
                       <td>{product.id}</td>
                       <td>{product.title}</td>
                       <td>{product.price}</td>
-                      <td>{categoryTitle(product.categoryId)}</td>
+                      <td>{getCategoryTitle(product.categoryId)}</td>
                       <td>
                         <input
                           type="button"
                           value="Delete"
                           disabled={
-                            deleteProduct.isLoading
-                              ? true
-                              : inputType === "edit"
-                              ? true
-                              : false
+                            deleteProduct.isLoading ||
+                            inputProduct.type === "edit"
                           }
                           onClick={() =>
                             deleteProduct
-                              .delProduct({
-                                id: product.id,
-                                title: product.title,
-                                price: product.price,
-                                categoryId: product.categoryId,
-                              })
-                              .then(() => {
-                                fetchProduct.reFetch();
-                              })
+                              .submit(product.id)
+                              .then(fetchProduct.reFetch)
                           }
                         ></input>
                         <input
                           type="button"
                           value="Edit"
                           disabled={
-                            editProduct.isLoading
-                              ? true
-                              : inputType === "edit"
-                              ? true
-                              : false
+                            editProduct.isLoading ||
+                            inputProduct.type === "edit"
                           }
                           onClick={() => {
-                            setIdEditProduct(product.id);
-                            setInputType("edit");
                             setInputProduct({
-                              title: product.title,
-                              price: product.price,
-                              categoryId: product.categoryId,
+                              type: "edit",
+                              selectedId: product.id,
+                              values: {
+                                categoryId: product.categoryId,
+                                title: product.title,
+                                price: product.price,
+                              },
                             });
                           }}
                         ></input>
