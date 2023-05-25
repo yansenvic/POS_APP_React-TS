@@ -1,17 +1,30 @@
 import { useState } from "react";
-import { NavBar } from "../component/NavBar";
+import { SideBar } from "../component/SideBar";
+import { Navbar } from "../component/NavBar";
 import {
   useCreateCategory,
   useDeleteCategory,
   useEditCategory,
   useFetchCategories,
 } from "../domain/categories";
+import styled from "styled-components";
+import { Header } from "./HomePage";
 
 type CategoryPageProps = {
   HomeClick: () => void;
   CategoryClick: () => void;
   ProductClick: () => void;
 };
+
+const Div = styled.div`
+  display: grid;
+  grid-template-columns: 15% 85%;
+`;
+
+const ContentWrapper = styled.div`
+  display: grid;
+  flex-flow: column;
+`;
 
 type CategoryForm =
   | {
@@ -53,103 +66,110 @@ export function CategoryPage(props: CategoryPageProps) {
 
   return (
     <div>
-      <NavBar
-        onClickHome={props.HomeClick}
-        onClickCategory={props.CategoryClick}
-        onClickProduct={props.ProductClick}
-      />
-      <p>Welcome to Category Page</p>
-      <span>Category Name : </span>
-      <input
-        type="text"
-        id="inputCategory"
-        value={inputCategory.title}
-        onChange={(e) =>
-          setInputCategory({ ...inputCategory, title: e.target.value })
-        }
-      ></input>
-      <input
-        type="button"
-        value={inputCategory.type === "add" ? "Add" : "Update"}
-        disabled={createCategory.isLoading}
-        onClick={() => onInputCategory(inputCategory)}
-      ></input>
-      {(function () {
-        if (fetchCategories.isLoading) {
-          return <p>Data is Loading</p>;
-        } else if (
-          createCategory.errorMessage ||
-          deleteCategory.errorMessage ||
-          editCategory.errorMessage ||
-          fetchCategories.errorMessage
-        ) {
-          return (
-            <p>
-              {createCategory.errorMessage ||
-                deleteCategory.errorMessage ||
-                editCategory.errorMessage ||
-                fetchCategories.errorMessage}
-            </p>
-          );
-        } else if (fetchCategories.categories.length === 0) {
-          return <p>Data Empty</p>;
-        } else {
-          return (
-            <table
-              style={
-                inputCategory.type === "edit"
-                  ? { display: "none" }
-                  : { display: "table" }
+      <Navbar></Navbar>
+      <Div>
+        <SideBar
+          onClickHome={props.HomeClick}
+          onClickCategory={props.CategoryClick}
+          onClickProduct={props.ProductClick}
+        />
+        <ContentWrapper>
+          <div>
+            <Header>Welcome to Category Page</Header>
+            <span>Category Name : </span>
+            <input
+              type="text"
+              id="inputCategory"
+              value={inputCategory.title}
+              onChange={(e) =>
+                setInputCategory({ ...inputCategory, title: e.target.value })
               }
-            >
-              <thead>
-                <tr>
-                  <th>ID Category</th>
-                  <th>Title</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fetchCategories.categories.map((category) => {
-                  return (
-                    <tr key={category.id}>
-                      <td>{category.id}</td>
-                      <td>{category.title}</td>
-                      <td>
-                        <input
-                          type="button"
-                          value="Delete"
-                          disabled={deleteCategory.isLoading}
-                          onClick={() =>
-                            deleteCategory
-                              .delCategory({
-                                id: category.id,
-                                title: category.title,
-                              })
-                              .then(fetchCategories.reFetch)
-                          }
-                        ></input>
-                        <input
-                          type="button"
-                          value="Edit"
-                          disabled={editCategory.isLoading}
-                          onClick={() => {
-                            setInputCategory({
-                              selectedId: category.id,
-                              title: category.title,
-                              type: "edit",
-                            });
-                          }}
-                        ></input>
-                      </td>
+            ></input>
+            <input
+              type="button"
+              value={inputCategory.type === "add" ? "Add" : "Update"}
+              disabled={createCategory.isLoading}
+              onClick={() => onInputCategory(inputCategory)}
+            ></input>
+          </div>
+          {(function () {
+            if (fetchCategories.isLoading) {
+              return <p>Data is Loading</p>;
+            } else if (
+              createCategory.errorMessage ||
+              deleteCategory.errorMessage ||
+              editCategory.errorMessage ||
+              fetchCategories.errorMessage
+            ) {
+              return (
+                <p>
+                  {createCategory.errorMessage ||
+                    deleteCategory.errorMessage ||
+                    editCategory.errorMessage ||
+                    fetchCategories.errorMessage}
+                </p>
+              );
+            } else if (fetchCategories.categories.length === 0) {
+              return <p>Data Empty</p>;
+            } else {
+              return (
+                <table
+                  style={
+                    inputCategory.type === "edit"
+                      ? { display: "none" }
+                      : { display: "table" }
+                  }
+                >
+                  <thead>
+                    <tr>
+                      <th>ID Category</th>
+                      <th>Title</th>
+                      <th>Action</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          );
-        }
-      })()}
+                  </thead>
+                  <tbody>
+                    {fetchCategories.categories.map((category) => {
+                      return (
+                        <tr key={category.id}>
+                          <td>{category.id}</td>
+                          <td>{category.title}</td>
+                          <td>
+                            <input
+                              type="button"
+                              value="Delete"
+                              disabled={deleteCategory.isLoading}
+                              onClick={() =>
+                                deleteCategory
+                                  .delCategory({
+                                    id: category.id,
+                                    title: category.title,
+                                  })
+                                  .then(fetchCategories.reFetch)
+                              }
+                            ></input>
+                            <input
+                              type="button"
+                              value="Edit"
+                              disabled={editCategory.isLoading}
+                              onClick={() => {
+                                setInputCategory({
+                                  selectedId: category.id,
+                                  title: category.title,
+                                  type: "edit",
+                                });
+                              }}
+                            ></input>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              );
+            }
+          })()}
+        </ContentWrapper>
+      </Div>
     </div>
   );
 }
@@ -161,7 +181,7 @@ export function CategoryPage(props: CategoryPageProps) {
 //         setCategories(categories)
 //     })
 // },[])
-// const navBar = NavBar({
+// const SideBar = SideBar({
 //     onClickHome : props.HomeClick,
 //     onClickCategory: props.CategoryClick,
 //     onClickProduct : props.ProductClick

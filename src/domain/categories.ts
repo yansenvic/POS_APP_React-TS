@@ -9,9 +9,7 @@ export type CategoryRequest = Omit<Category, "id">;
 
 export function fetchData() {
   return fetch(`http://localhost:3000/category`)
-    .then((result) => {
-      return result.json();
-    })
+    .then((result) => result.json())
     .then((data: Category[]) => data);
 }
 
