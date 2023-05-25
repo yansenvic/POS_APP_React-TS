@@ -7,21 +7,20 @@ export type Product = {
   categoryId: number;
 };
 
+export type ProductRequest = Omit<Product, "id">;
+
 export function fetchData() {
   return fetch(`http://localhost:3000/product`)
     .then((result) => {
       return result.json();
     })
-    .then((data: Product[]) => {
-      return [...data];
-    });
+    .then((data: Product[]) => data);
 }
 
-export function postProduct(props: Product) {
+export function postProduct(props: ProductRequest) {
   return fetch(`http://localhost:3000/product`, {
     method: "POST",
     body: JSON.stringify({
-      id: props.id,
       title: props.title,
       price: props.price,
       categoryId: props.categoryId,
@@ -30,8 +29,8 @@ export function postProduct(props: Product) {
   });
 }
 
-export function deleteProduct(props: Product) {
-  return fetch(`http://localhost:3000/product/` + props.id, {
+export function deleteProduct(id: number) {
+  return fetch(`http://localhost:3000/product/` + id, {
     method: "DELETE",
   });
 }
@@ -50,44 +49,78 @@ export function editProduct(props: Product) {
 }
 
 export function useFetchProduct() {
-  const [products, setProducts] = useState<Product[]>();
-  const [isLoadingFetchProduct, setIsLoadingFetchProduct] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMassage, setErrorMassage] = useState("");
   useEffect(() => {
-    fetchData().then((products) => {
-      setProducts(products);
-    });
+    setIsLoading(true);
+    fetchData()
+      .then((data) => {
+        setProducts(data);
+        setErrorMassage("");
+      })
+      .catch((err) => {
+        setProducts([]);
+        setErrorMassage(err.message);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
-  function reFetchProduct() {
-    fetchData().then((products) => {
-      setProducts(products);
-    });
+  function reFetch() {
+    setIsLoading(true);
+    fetchData()
+      .then((data) => {
+        setProducts(data);
+        setErrorMassage("");
+      })
+      .catch((err) => {
+        setProducts([]);
+        setErrorMassage(err.message);
+      })
+      .finally(() => setIsLoading(false));
   }
-  return { products, reFetchProduct, isLoadingFetchProduct };
+  return {
+    products,
+    reFetch,
+    errorMassage,
+    isLoading,
+  };
 }
 
 export function useCreateProduct() {
-  const [isLoadingCreate, setIsLoadingCreate] = useState(false);
-  function submit(props: Product) {
-    setIsLoadingCreate(true);
-    return postProduct(props).then(() => setIsLoadingCreate(false));
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  function submit(props: ProductRequest) {
+    setIsLoading(true);
+    return postProduct(props)
+      .then(() => setErrorMessage(""))
+      .catch((err) => setErrorMessage(err.message))
+      .finally(() => setIsLoading(false));
   }
-  return { isLoadingCreate, submit };
+  return { isLoading, errorMessage, submit };
 }
 
 export function useDeleteProduct() {
-  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
-  function delProduct(props: Product) {
-    setIsLoadingDelete(true);
-    return deleteProduct(props).then(() => setIsLoadingDelete(false));
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  function submit(id: number) {
+    setIsLoading(true);
+    return deleteProduct(id)
+      .then(() => setErrorMessage(""))
+      .catch((err) => setErrorMessage(err.message))
+      .finally(() => setIsLoading(false));
   }
-  return { isLoadingDelete, delProduct };
+  return { isLoading, errorMessage, submit };
 }
 
 export function useEditProduct() {
-  const [isLoadingEdit, setIsLoadingEdit] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   function updateProduct(props: Product) {
-    setIsLoadingEdit(true);
-    return editProduct(props).then(() => setIsLoadingEdit(false));
+    setIsLoading(true);
+    return editProduct(props)
+      .then(() => setErrorMessage(""))
+      .catch((err) => setErrorMessage(err.message))
+      .finally(() => setIsLoading(false));
   }
-  return { isLoadingEdit, updateProduct };
+  return { isLoading, errorMessage, updateProduct };
 }
