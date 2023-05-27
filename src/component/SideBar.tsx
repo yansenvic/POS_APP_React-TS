@@ -5,6 +5,7 @@ type SideBarProps = {
   onClickHome: () => void;
   onClickCategory: () => void;
   onClickProduct: () => void;
+  onClickTransaction: () => void;
 };
 
 const Div = styled.div`
@@ -30,11 +31,17 @@ export function SideBar(props: SideBarProps) {
     label: "Product",
     onClick: props.onClickProduct,
   });
+  const linkTransaction = Link({
+    pathname: "/transaction",
+    label: "Transaction",
+    onClick: props.onClickTransaction,
+  });
   return (
     <Div>
       {linkHome}
       {linkCategory}
       {linkProduct}
+      {linkTransaction}
     </Div>
   );
 }

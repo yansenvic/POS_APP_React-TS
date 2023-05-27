@@ -14,6 +14,7 @@ type CategoryPageProps = {
   HomeClick: () => void;
   CategoryClick: () => void;
   ProductClick: () => void;
+  TransactionClick: () => void;
 };
 
 const Div = styled.div`
@@ -72,6 +73,7 @@ export function CategoryPage(props: CategoryPageProps) {
           onClickHome={props.HomeClick}
           onClickCategory={props.CategoryClick}
           onClickProduct={props.ProductClick}
+          onClickTransaction={props.TransactionClick}
         />
         <ContentWrapper>
           <div>

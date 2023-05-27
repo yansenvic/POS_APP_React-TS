@@ -9,8 +9,8 @@ export type Product = {
 
 export type ProductRequest = Omit<Product, "id">;
 
-export function fetchData() {
-  return fetch(`http://localhost:3000/product`)
+export function fetchData(filterTitle: string) {
+  return fetch(`http://localhost:3000/product?title_like=${filterTitle}`)
     .then((result) => {
       return result.json();
     })
@@ -48,13 +48,13 @@ export function editProduct(props: Product) {
   });
 }
 
-export function useFetchProduct() {
+export function useFetchProduct(filterTitle: string) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMassage, setErrorMassage] = useState("");
   useEffect(() => {
     setIsLoading(true);
-    fetchData()
+    fetchData(filterTitle)
       .then((data) => {
         setProducts(data);
         setErrorMassage("");
@@ -67,7 +67,7 @@ export function useFetchProduct() {
   }, []);
   function reFetch() {
     setIsLoading(true);
-    fetchData()
+    fetchData(filterTitle)
       .then((data) => {
         setProducts(data);
         setErrorMassage("");

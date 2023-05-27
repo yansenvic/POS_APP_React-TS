@@ -6,6 +6,7 @@ type HomePageProps = {
   HomeClick: () => void;
   CategoryClick: () => void;
   ProductClick: () => void;
+  TransactionClick: () => void;
 };
 
 export const Header = styled.h2`
@@ -29,6 +30,7 @@ export function HomePage(props: HomePageProps) {
             onClickHome={props.HomeClick}
             onClickCategory={props.CategoryClick}
             onClickProduct={props.ProductClick}
+            onClickTransaction={props.TransactionClick}
           />
         </div>
         <div>

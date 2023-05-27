@@ -16,6 +16,7 @@ type ProductPageProps = {
   HomeClick: () => void;
   CategoryClick: () => void;
   ProductClick: () => void;
+  TransactionClick: () => void;
 };
 
 const Div = styled.div`
@@ -88,7 +89,7 @@ const defaultInputProduct: ProductForm = {
 export function ProductPage(props: ProductPageProps) {
   const [inputProduct, setInputProduct] =
     useState<ProductForm>(defaultInputProduct);
-  const fetchProduct = useFetchProduct();
+  const fetchProduct = useFetchProduct("");
   const fetchCategories = useFetchCategories();
   const createProduct = useCreateProduct();
   const deleteProduct = useDeleteProduct();
@@ -151,6 +152,7 @@ export function ProductPage(props: ProductPageProps) {
           onClickHome={props.HomeClick}
           onClickCategory={props.CategoryClick}
           onClickProduct={props.ProductClick}
+          onClickTransaction={props.TransactionClick}
         />
         <ContentWrapper>
           <Header>Welcome to Product Page</Header>
