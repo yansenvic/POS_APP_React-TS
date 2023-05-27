@@ -35,18 +35,18 @@ export function postTransaction(props: TransactionRequest) {
 }
 
 export function useFetchTransaction() {
-  const [transaction, setTransaction] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
     setIsLoading(true);
     fetchTransaction()
       .then((data) => {
-        setTransaction(data);
+        setTransactions(data);
         setErrorMessage("");
       })
       .catch((err) => {
-        setTransaction([]);
+        setTransactions([]);
         setErrorMessage(err.message);
       })
       .finally(() => {
@@ -57,18 +57,18 @@ export function useFetchTransaction() {
     setIsLoading(true);
     fetchTransaction()
       .then((data) => {
-        setTransaction(data);
+        setTransactions(data);
         setErrorMessage("");
       })
       .catch((err) => {
-        setTransaction([]);
+        setTransactions([]);
         setErrorMessage(err.message);
       })
       .finally(() => {
         setIsLoading(false);
       });
   }
-  return { transaction, isLoading, errorMessage, reFetch };
+  return { transactions, isLoading, errorMessage, reFetch };
 }
 
 export function onAddTransaction() {
