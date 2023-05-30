@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DetailTransaction } from "../screen/TransactionPage";
+import { DetailTransaction } from "../screen/DetailTransactionPage";
 
 export type Transaction = {
   id: number;
@@ -11,8 +11,8 @@ export type Transaction = {
 
 type TransactionRequest = Omit<Transaction, "id">;
 
-export function fetchTransaction() {
-  return fetch(`http://localhost:3000/transaction`)
+export function fetchTransaction(filterTransaction: string) {
+  return fetch(`http://localhost:3000/transaction${filterTransaction}`)
     .then((result) => {
       return result.json();
     })
@@ -34,13 +34,13 @@ export function postTransaction(props: TransactionRequest) {
   });
 }
 
-export function useFetchTransaction() {
+export function useFetchTransaction(filterTransaction: string) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
     setIsLoading(true);
-    fetchTransaction()
+    fetchTransaction(filterTransaction)
       .then((data) => {
         setTransactions(data);
         setErrorMessage("");
@@ -55,7 +55,7 @@ export function useFetchTransaction() {
   }, []);
   function reFetch() {
     setIsLoading(true);
-    fetchTransaction()
+    fetchTransaction(filterTransaction)
       .then((data) => {
         setTransactions(data);
         setErrorMessage("");
