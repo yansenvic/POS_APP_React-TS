@@ -1,4 +1,4 @@
-import Styled, { styled } from "styled-components";
+import { styled } from "styled-components";
 
 export type LinkProps = {
   pathname: string;
@@ -28,8 +28,8 @@ export function Link(props: LinkProps) {
   return (
     <A
       href={props.pathname}
-      onClick={(event) => {
-        event.preventDefault();
+      onClick={(e) => {
+        e.preventDefault();
         props.onClick();
       }}
     >
