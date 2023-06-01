@@ -2,12 +2,7 @@ import { SideBar } from "../component/SideBar";
 import { Navbar } from "../component/NavBar";
 import styled from "styled-components";
 
-type HomePageProps = {
-  HomeClick: () => void;
-  CategoryClick: () => void;
-  ProductClick: () => void;
-  TransactionClick: () => void;
-};
+type HomePageProps = {};
 
 export const Header = styled.h2`
   color: black;
@@ -20,18 +15,13 @@ const Div = styled.div`
   height: 500px;
 `;
 
-export function HomePage(props: HomePageProps) {
+export function HomePage(_props: HomePageProps) {
   return (
     <div>
       <Navbar />
       <Div>
         <div>
-          <SideBar
-            onClickHome={props.HomeClick}
-            onClickCategory={props.CategoryClick}
-            onClickProduct={props.ProductClick}
-            onClickTransaction={props.TransactionClick}
-          />
+          <SideBar />
         </div>
         <div>
           <Header>Welcome to Home Page</Header>

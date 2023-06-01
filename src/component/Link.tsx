@@ -28,8 +28,8 @@ export function Link(props: LinkProps) {
   return (
     <A
       href={props.pathname}
-      onClick={(event) => {
-        event.preventDefault();
+      onClick={(e) => {
+        e.preventDefault();
         props.onClick();
       }}
     >

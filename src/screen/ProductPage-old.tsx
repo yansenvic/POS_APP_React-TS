@@ -90,6 +90,29 @@ export function ProductPage(_props: ProductPageProps) {
   const deleteProduct = useDeleteProduct();
   const editProduct = useEditProduct();
 
+  // function onAddProduct(props: ProductRequest) {
+  //   const newProduct = { ...props };
+  //   createProduct.submit(newProduct).then(() => {
+  //     setInputProduct(defaultInputProduct);
+  //     fetchProduct.reFetch();
+  //   });
+  // }
+
+  // function onEditProduct(props: ProductForm) {
+  //   if (!props.selectedId) return;
+  //   editProduct
+  //     .updateProduct({
+  //       id: props.selectedId,
+  //       title: props.values.title,
+  //       price: props.values.price,
+  //       categoryId: props.values.categoryId,
+  //     })
+  //     .then(() => {
+  //       setInputProduct(defaultInputProduct);
+  //       fetchProduct.reFetch();
+  //     });
+  // }
+
   function onInputProduct(props: ProductForm) {
     if (props.type === "add") {
       createProduct.submit(props.values).then(() => {

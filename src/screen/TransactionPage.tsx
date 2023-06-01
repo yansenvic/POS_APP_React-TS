@@ -7,12 +7,7 @@ import { Transaction } from "../domain/transaction";
 import { DetailTransactionPage } from "./DetailTransactionPage";
 import { AddTransactionPage } from "./AddTransactionPage";
 
-type TransactionPageProps = {
-  HomeClick: () => void;
-  CategoryClick: () => void;
-  ProductClick: () => void;
-  TransactionClick: () => void;
-};
+type TransactionPageProps = {};
 
 const Wrapper = styled.div`
   display: flex;
@@ -43,7 +38,7 @@ export const defaultAddTransaction: TransactionForm = {
   },
 };
 
-export function TransactionPage(props: TransactionPageProps) {
+export function TransactionPage(_props: TransactionPageProps) {
   const [addTransaction, setAddTransaction] = useState<TransactionForm>(
     defaultAddTransaction
   );
@@ -63,73 +58,78 @@ export function TransactionPage(props: TransactionPageProps) {
       <Navbar />
       <Wrapper>
         <div>
-          <SideBar
-            onClickHome={props.HomeClick}
-            onClickCategory={props.CategoryClick}
-            onClickProduct={props.ProductClick}
-            onClickTransaction={props.TransactionClick}
-          />
+          <SideBar />
         </div>
         <div>
           <h2>Welcome to Transaction Page</h2>
           <div>
             {(function () {
-              if (addTransaction.type === "home") {
-                return (
-                  <div>
-                    <input
-                      type="button"
-                      value="Add Transaction"
-                      onClick={() => {
-                        setAddTransaction({ ...addTransaction, type: "add" });
-                      }}
-                    />
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>No</th>
-                          <th>ID Transaction</th>
-                          <th>Total</th>
-                          <th>Payment</th>
-                          <th>Return</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {fetchTransaction.transactions.map(
-                          (transaction: Transaction, index: number) => {
-                            return (
-                              <tr key={index}>
-                                <td>{index + 1}</td>
-                                <td>{transaction.id}</td>
-                                <td>{transaction.total}</td>
-                                <td>{transaction.payment}</td>
-                                <td>{transaction.return}</td>
-                                <td>
-                                  <input
-                                    type="button"
-                                    value="Detail Transaction"
-                                    onClick={() =>
-                                      setAddTransaction({
-                                        values: transaction,
-                                        type: "detail",
-                                      })
-                                    }
-                                  />
-                                </td>
-                              </tr>
-                            );
-                          }
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                );
-              } else if (addTransaction.type === "detail") {
-                return <div>{detailTransactionPage}</div>;
-              } else if (addTransaction.type === "add") {
-                return <div>{addTransactionPage}</div>;
-              }
+              if (fetchTransaction.isLoading) {
+                return <p>Data is Loading</p>;
+              } else if (fetchTransaction.errorMessage) {
+                return <p>{fetchTransaction.errorMessage}</p>;
+              } else
+                return (function () {
+                  if (addTransaction.type === "home") {
+                    return (
+                      <div>
+                        <input
+                          type="button"
+                          value="Add Transaction"
+                          onClick={() => {
+                            setAddTransaction({
+                              ...addTransaction,
+                              type: "add",
+                            });
+                          }}
+                        />
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>No</th>
+                              <th>ID Transaction</th>
+                              <th>Total</th>
+                              <th>Payment</th>
+                              <th>Return</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {fetchTransaction.transactions.map(
+                              (transaction: Transaction, index: number) => {
+                                return (
+                                  <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>{transaction.id}</td>
+                                    <td>{transaction.total}</td>
+                                    <td>{transaction.payment}</td>
+                                    <td>{transaction.return}</td>
+                                    <td>
+                                      <input
+                                        type="button"
+                                        value="Detail Transaction"
+                                        onClick={() =>
+                                          setAddTransaction({
+                                            values: transaction,
+                                            type: "detail",
+                                          })
+                                        }
+                                      />
+                                    </td>
+                                  </tr>
+                                );
+                              }
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  } else if (addTransaction.type === "detail") {
+                    return <div>{detailTransactionPage}</div>;
+                  } else if (addTransaction.type === "add") {
+                    return <div>{addTransactionPage}</div>;
+                  }
+                })();
             })()}
           </div>
         </div>

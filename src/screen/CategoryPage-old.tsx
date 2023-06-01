@@ -171,3 +171,20 @@ export function CategoryPage(_props: CategoryPageProps) {
     </div>
   );
 }
+
+// const [categories,setCategories] = useState<Category[]>()
+// useEffect(()=> {
+//     fetchData()
+//     .then((categories)=>{
+//         setCategories(categories)
+//     })
+// },[])
+// const SideBar = SideBar({
+//     onClickHome : props.HomeClick,
+//     onClickCategory: props.CategoryClick,
+//     onClickProduct : props.ProductClick
+// })
+// function postNewCategories(value: string) {
+//   const id = categories ? categories[categories?.length - 1].id + 1 : 1;
+//   postData({ id: id, title: value });
+// }

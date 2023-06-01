@@ -1,12 +1,8 @@
 import { styled } from "styled-components";
 import { Link } from "./Link";
+import { usePathContext } from "../context/PathContext";
 
-type SideBarProps = {
-  onClickHome: () => void;
-  onClickCategory: () => void;
-  onClickProduct: () => void;
-  onClickTransaction: () => void;
-};
+type SideBarProps = {};
 
 const Div = styled.div`
   & {
@@ -15,33 +11,26 @@ const Div = styled.div`
   }
 `;
 
-export function SideBar(props: SideBarProps) {
-  const linkHome = Link({
-    pathname: "/home",
-    label: "Home",
-    onClick: props.onClickHome,
-  });
-  const linkCategory = Link({
-    pathname: "/category",
-    label: "Category",
-    onClick: props.onClickCategory,
-  });
-  const linkProduct = Link({
-    pathname: "/product",
-    label: "Product",
-    onClick: props.onClickProduct,
-  });
-  const linkTransaction = Link({
-    pathname: "/transaction",
-    label: "Transaction",
-    onClick: props.onClickTransaction,
-  });
+export function SideBar(_props: SideBarProps) {
+  const { setPath } = usePathContext();
   return (
     <Div>
-      {linkHome}
-      {linkCategory}
-      {linkProduct}
-      {linkTransaction}
+      <Link pathname="/home" onClick={() => setPath("/home")} label="Home" />
+      <Link
+        pathname="/category"
+        onClick={() => setPath("/category")}
+        label="Category"
+      />
+      <Link
+        pathname="/product"
+        onClick={() => setPath("/product")}
+        label="Product"
+      />
+      <Link
+        pathname="/transaction"
+        onClick={() => setPath("/transaction")}
+        label="Transaction"
+      />
     </Div>
   );
 }
