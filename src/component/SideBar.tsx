@@ -31,6 +31,11 @@ export function SideBar(_props: SideBarProps) {
         onClick={() => setPath("/transaction")}
         label="Transaction"
       />
+      <Link
+        pathname="/Profile"
+        onClick={() => setPath("/profile")}
+        label="Profile"
+      />
     </Div>
   );
 }
