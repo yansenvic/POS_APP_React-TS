@@ -8,6 +8,7 @@ const Div = styled.div`
   & {
     display: flex;
     flex-flow: column;
+    border-right: 1px solid black;
   }
 `;
 

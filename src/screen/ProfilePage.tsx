@@ -5,7 +5,6 @@ import { useProfileContext } from "../context/ProfileContext";
 import { useState } from "react";
 
 export const Header = styled.h2`
-  color: black;
   text-align: center;
 `;
 

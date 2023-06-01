@@ -23,7 +23,6 @@ const ContentWrapper = styled.div`
   display: flex;
   flex-flow: column;
   padding: 1em 3em 2em 3em;
-  background-color: #fcfdff;
   border-radius: 5px;
   box-shadow: 0px 3px 10px -2px rgba(0, 0, 0, 0.5);
 `;
@@ -32,7 +31,6 @@ const Container = styled.div`
   display: flex;
   flex-flow: column;
   padding: 1em 3em 2em 3em;
-  background-color: #fcfdff;
   border-radius: 5px;
   box-shadow: 0px 3px 10px -2px rgba(0, 0, 0, 0.5);
   width: 25%;
@@ -42,14 +40,12 @@ const Container = styled.div`
 const Table = styled.table`
    {
     font-family: sans-serif;
-    color: #444;
     border-collapse: collapse;
     width: 100%;
     border: 1px solid #f2f5f7;
   }
   .tr th {
     background: #35a9db;
-    color: #fff;
     font-weight: normal;
   }
   .tr td {
