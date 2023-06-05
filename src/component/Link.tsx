@@ -13,10 +13,9 @@ const A = styled.a`
     text-decoration: none;
     font-size: 20px;
     text-align: center;
-    color: black;
     padding: 20px;
     transition: background-color 1s;
-    background-color: white;
+    color: inherit;
   }
   &:hover {
     background-color: #004369;

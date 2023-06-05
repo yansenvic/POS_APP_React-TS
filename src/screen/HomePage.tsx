@@ -5,7 +5,6 @@ import styled from "styled-components";
 type HomePageProps = {};
 
 export const Header = styled.h2`
-  color: black;
   text-align: center;
 `;
 

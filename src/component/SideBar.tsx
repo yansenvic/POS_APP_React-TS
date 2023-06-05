@@ -8,6 +8,7 @@ const Div = styled.div`
   & {
     display: flex;
     flex-flow: column;
+    border-right: 1px solid black;
   }
 `;
 
@@ -30,6 +31,11 @@ export function SideBar(_props: SideBarProps) {
         pathname="/transaction"
         onClick={() => setPath("/transaction")}
         label="Transaction"
+      />
+      <Link
+        pathname="/Profile"
+        onClick={() => setPath("/profile")}
+        label="Profile"
       />
     </Div>
   );
